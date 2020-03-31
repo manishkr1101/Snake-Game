@@ -1,8 +1,18 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+}
+
 body{
     width: 100%;
     overflow: hidden;
 }
 #board{
     border: solid 2px black;
+}
+
+div.board{
+    height: 400px;
+    width: 50%;
     margin: 50px auto;
 }

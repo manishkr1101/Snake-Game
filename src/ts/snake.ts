@@ -7,6 +7,8 @@ type coord = {
 
 const ctx = new Drawer('board')
 
+const board = document.getElementById('board')
+
 async function wait(ms){
     return new Promise((res, rej) => setTimeout(res, ms))
 }
@@ -24,7 +26,7 @@ export default class Snake{
         this.pos = [{x:this.gap, y: this.gap},{x:2*this.gap+size, y: this.gap}]
         this.color = color
         this.direction = "right"
-        this.randomBlock = this.getRandomBlock()
+        this.getRandomBlock()
     }
 
     init(){
@@ -32,25 +34,42 @@ export default class Snake{
     }
 
     async start(){
-        this.draw(this.randomBlock.x, this.randomBlock.y)
-        while(true){
-            await this.update()
+        try {
+            // this.draw(this.randomBlock.x, this.randomBlock.y)
+            while(true){
+                await this.update()
+            }
+        } catch (error) {
+            console.log(error)
         }
+        
         
     }
 
     async update(){
         await wait(800)
+        // check 
+
         // move in direction it is
         
         const toRemove = this.updateArray()
 
+        // check boundary collision
+        this.checkBoundary()
+
+        
+
         //1. remove last block
-        this.clear(toRemove.x, toRemove.y)
+        if(toRemove){
+            this.clear(toRemove.x, toRemove.y)
+        }
+        
 
         const front = this.pos[this.pos.length-1]
         //2. add block in front
         this.draw(front.x, front.y);
+
+        
 
     }
 
@@ -61,8 +80,22 @@ export default class Snake{
         
     }
 
-    addBlock(){
+    checkFood(): boolean{
+        const front = this.pos[this.pos.length-1]
+        if(this.randomBlock.x == front.x && this.randomBlock.y == front.y){
+            return true
+        }
+        return false
 
+    }
+
+    checkBoundary(){
+        let width =parseInt(board.getAttribute('width'))
+        let height =parseInt(board.getAttribute('height'))
+        const front = this.pos[this.pos.length-1]
+        if(front.x >= width || front.x <= 0 || front.y <= 0 || front.y >= height){
+            throw Error('collision')
+        }
     }
 
     getRandomBlock(): coord{
@@ -74,10 +107,12 @@ export default class Snake{
             y: this.gap + y_offset*(this.gap+this.size)
         }
 
-        const res = this.pos.find((value, index) => value.x == block.x && value.y == block.y)
+        const res = this.pos.find((value) => value.x == block.x && value.y == block.y)
         if(res){
             return this.getRandomBlock()
         }
+        this.draw(block.x, block.y)
+        this.randomBlock = block
         return block
     }
 
@@ -106,6 +141,12 @@ export default class Snake{
         }
 
         this.pos.push(block)
+        // check if food is ahead
+        if(this.checkFood()){
+            console.log('got food')
+            this.getRandomBlock()
+            return
+        }
 
         return this.pos.splice(0,1)[0]
     }

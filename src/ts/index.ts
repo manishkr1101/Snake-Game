@@ -11,24 +11,25 @@ console.log(snake)
 snake.display();
 snake.start()
 
-// snake.moveUp()
-// snake.moveRight()
-// setInterval(snake.moveRight.call,1000, snake)
 
 
 window.addEventListener('keydown', (e) => {
     // console.log(e)
     switch(e.code){
         case 'ArrowRight': 
-            snake.direction = "right"
+            if(snake.direction != 'left')
+                snake.direction = "right"
             break;
         case 'ArrowLeft':
-            snake.direction = "left"
+            if(snake.direction != "right")
+                snake.direction = "left"
             break;
         case 'ArrowUp':
-            snake.direction = "up"
+            if(snake.direction != "down")
+                snake.direction = "up"
             break;
         case 'ArrowDown':
+            if(snake.direction != "up")
             snake.direction = "down"
             break;
     }
