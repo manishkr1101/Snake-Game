@@ -1,4 +1,5 @@
 import Drawer from "./drawer"
+import * as UICtrl from './UIController'
 
 type coord = {
     x:number,
@@ -19,7 +20,10 @@ export default class Snake{
     private gap: number
     color: string
     direction: 'left'|'right'|'up'|'down'
-    randomBlock: coord
+    private randomBlock: coord
+    private flag: boolean
+    totalScore: number
+    level: number
     constructor(size:number, color:string){
         this.size = size
         this.gap = Math.floor(this.size / 10)
@@ -27,16 +31,24 @@ export default class Snake{
         this.color = color
         this.direction = "right"
         this.getRandomBlock()
+        this.flag = false
+        this.totalScore = 0
+        this.level = 1
     }
 
     init(){
 
     }
 
+    getFlag(){
+        return this.flag
+    }
+
     async start(){
+        this.flag = true
         try {
             // this.draw(this.randomBlock.x, this.randomBlock.y)
-            while(true){
+            while(this.flag){
                 await this.update()
             }
         } catch (error) {
@@ -46,8 +58,17 @@ export default class Snake{
         
     }
 
+    async pause(){
+        this.flag = false
+    }
+
+    async resume(){
+        
+        this.start()
+    }
+
     async update(){
-        await wait(800)
+        await wait(500)
         // check 
 
         // move in direction it is
@@ -111,7 +132,7 @@ export default class Snake{
         if(res){
             return this.getRandomBlock()
         }
-        this.draw(block.x, block.y)
+        this.draw(block.x, block.y, 'black')
         this.randomBlock = block
         return block
     }
@@ -143,7 +164,8 @@ export default class Snake{
         this.pos.push(block)
         // check if food is ahead
         if(this.checkFood()){
-            console.log('got food')
+            // console.log('got food')
+            this.updateScore()
             this.getRandomBlock()
             return
         }
@@ -151,9 +173,14 @@ export default class Snake{
         return this.pos.splice(0,1)[0]
     }
 
-    draw(x:number, y:number){
+    updateScore(){
+        this.totalScore += this.level*10
+        UICtrl.updateScore(this.totalScore)
+    }
+
+    draw(x:number, y:number, color:string=this.color){
         const len = this.size
-        ctx.draw_rect(x, y, len, len, this.color, true)
+        ctx.draw_rect(x, y, len, len, color, true)
     }
 
     clear(x:number, y:number){
