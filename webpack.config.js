@@ -20,10 +20,21 @@ module.exports = {
         }),
         new CopyWebpackPlugin([
             {
+                from: './src/*',
+                to: './',
+                flatten: true,
+                ignore: ['index.html']
+            },
+            {
                 from: './src/css',
                 to: 'css',
                 toType: 'dir',
                 flatten: true
+            },
+            {
+                from: './src/assets',
+                to: 'assets',
+                toType: 'dir',
             }
         ])
     ]

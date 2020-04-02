@@ -6,6 +6,26 @@ export default class Drawer {
         this.context = context
     }
 
+    arc(){
+        
+    }
+
+    circle(x:number, y:number, radius:number, color:string, fill:boolean=true){
+        this.context.beginPath()
+        this.context.arc(x,y,radius,0,Math.PI*2,true)
+        this.context.fillStyle = color
+        if(fill){
+            this.context.fill()
+        } else{
+            this.context.stroke()
+        }
+        this.context.closePath()
+    }
+
+    draw_image(image:HTMLImageElement, dx:number, dy:number){
+        this.context.drawImage(image, dx, dy)
+    }
+
     draw_rect(x: number, y: number, width: number, height: number, color: string, fill: boolean = false) {
         this.context.fillStyle = color
         if (fill) {

@@ -9,6 +9,13 @@ type coord = {
 const ctx = new Drawer('board')
 
 const board = document.getElementById('board')
+let width =parseInt(board.getAttribute('width'))
+let height =parseInt(board.getAttribute('height'))
+
+let food = new Image()
+
+const eatSound = new Audio('assets/audio/Apple-bite.mp3')
+const failSound = new Audio('assets/audio/fail.mp3')
 
 async function wait(ms){
     return new Promise((res, rej) => setTimeout(res, ms))
@@ -30,14 +37,17 @@ export default class Snake{
         this.pos = [{x:this.gap, y: this.gap},{x:2*this.gap+size, y: this.gap}]
         this.color = color
         this.direction = "right"
+        // this.init()
         this.getRandomBlock()
         this.flag = false
         this.totalScore = 0
         this.level = 1
+        food.src = 'assets/images/food-30x30.png'
+        food.onload = () => ctx.draw_image(food,this.randomBlock.x, this.randomBlock.y)
     }
 
     init(){
-
+        ctx.draw_rect(0,0,width,height,"red", true)
     }
 
     getFlag(){
@@ -68,14 +78,14 @@ export default class Snake{
     }
 
     async update(){
-        await wait(500)
+        await wait(400)
         // check 
 
         // move in direction it is
         
         const toRemove = this.updateArray()
 
-        // check boundary collision
+        // check boundary && self collision
         this.checkBoundary()
 
         
@@ -111,12 +121,34 @@ export default class Snake{
     }
 
     checkBoundary(){
-        let width =parseInt(board.getAttribute('width'))
-        let height =parseInt(board.getAttribute('height'))
+        
         const front = this.pos[this.pos.length-1]
         if(front.x >= width || front.x <= 0 || front.y <= 0 || front.y >= height){
-            throw Error('collision')
+            failSound.play()
+            throw Error('collision with wall')
         }
+
+        // checking self collision
+        // if(
+        //     (this.direction === 'right' && this.isSnake(front.x+this.size+this.gap, front.y)) || 
+        //     (this.direction === 'left' && this.isSnake(front.x-this.size-this.gap, front.y)) ||
+        //     (this.direction === 'up' && this.isSnake(front.x, front.y-this.size-this.gap)) ||
+        //     (this.direction === 'down' && this.isSnake(front.x, front.y+this.size+this.gap))            
+        // ){
+        //     throw Error('collistion with snake')    
+        // }
+        if(this.isSnake(front.x, front.y)){
+            failSound.play()
+            throw Error('collision with snake')
+        }
+    }
+
+    isSnake(x:number, y:number):boolean{
+        const n = this.pos.length
+        const found = this.pos.find((value, index) => index != n-1 && value.x === x && value.y=== y)
+        if(found)
+            return true
+        return false
     }
 
     getRandomBlock(): coord{
@@ -132,7 +164,10 @@ export default class Snake{
         if(res){
             return this.getRandomBlock()
         }
-        this.draw(block.x, block.y, 'black')
+        // this.draw(block.x, block.y, 'black')
+        // ctx.circle(block.x+this.size/2, block.y+this.size/2, this.size/2, 'black')
+        
+        ctx.draw_image(food,block.x, block.y)
         this.randomBlock = block
         return block
     }
@@ -165,12 +200,13 @@ export default class Snake{
         // check if food is ahead
         if(this.checkFood()){
             // console.log('got food')
+            eatSound.play()
             this.updateScore()
             this.getRandomBlock()
             return
         }
 
-        return this.pos.splice(0,1)[0]
+        return this.pos.shift()
     }
 
     updateScore(){

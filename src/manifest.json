@@ -1,0 +1,9 @@
+{
+    "name": "Snake",
+    "start_url": "/",
+    "background_color": "green",
+    "theme_color": "cyan",
+    "scope": ".",
+    "display": "standalone",
+    "orientation": "landscape"
+}

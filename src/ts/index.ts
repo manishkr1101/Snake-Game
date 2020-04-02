@@ -5,7 +5,7 @@ async function wait(ms){
     return new Promise((res, rej) => setTimeout(res, ms))
 }
 
-const snake = new Snake(30, 'green')
+const snake = new Snake(30, 'blue')
 
 // console.log(snake)
 
@@ -55,8 +55,18 @@ function pauseGame(){
 elements.playBtn.addEventListener('click', playGame)
 elements.pauseBtn.addEventListener('click', pauseGame)
 
+if('serviceWorker' in navigator){
+    navigator.serviceWorker
+        .register('/sw.js')
+        .then(() => {
+            console.log('service worker is installing')
+        })
+}
+
 // let board:any = document.getElementById('board')
 // let ctx: CanvasRenderingContext2D = board.getContext('2d')
+
+
 
 // ctx.beginPath()
 // ctx.fillStyle = 'black'
