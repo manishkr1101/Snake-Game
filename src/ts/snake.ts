@@ -1,5 +1,6 @@
 import Drawer from "./drawer"
 import * as UICtrl from './UIController'
+import { unit, snakeColor, gap } from './config'
 
 type coord = {
     x:number,
@@ -8,9 +9,11 @@ type coord = {
 
 const ctx = new Drawer('board')
 
-const board = document.getElementById('board')
-let width =parseInt(board.getAttribute('width'))
-let height =parseInt(board.getAttribute('height'))
+// const board = document.getElementById('board')
+// // width of board
+// let width =parseInt(board.getAttribute('width'))
+// // height of board
+// let height =parseInt(board.getAttribute('height'))
 
 let food = new Image()
 
@@ -22,6 +25,7 @@ async function wait(ms){
 }
 
 export default class Snake{
+    
     private pos: coord[]
     size:number
     private gap: number
@@ -31,11 +35,12 @@ export default class Snake{
     private flag: boolean
     totalScore: number
     level: number
-    constructor(size:number, color:string){
-        this.size = size
-        this.gap = Math.floor(this.size / 10)
-        this.pos = [{x:this.gap, y: this.gap},{x:2*this.gap+size, y: this.gap}]
-        this.color = color
+    constructor(){
+        this.size = unit
+        // this.gap = Math.floor(this.size / 10)
+        this.gap= gap
+        this.pos = [{x:this.gap, y: this.gap},{x:2*this.gap+this.size, y: this.gap}]
+        this.color = snakeColor
         this.direction = "right"
         // this.init()
         this.getRandomBlock()
@@ -43,11 +48,13 @@ export default class Snake{
         this.totalScore = 0
         this.level = 1
         food.src = 'assets/images/food-30x30.png'
-        food.onload = () => ctx.draw_image(food,this.randomBlock.x, this.randomBlock.y)
+        food.onload = () => ctx.draw_image(food,this.randomBlock.x, this.randomBlock.y, this.size)
     }
 
+    
+
     init(){
-        ctx.draw_rect(0,0,width,height,"red", true)
+        ctx.draw_rect(0,0,Board.width,Board.height,"red", true)
     }
 
     getFlag(){
@@ -62,6 +69,7 @@ export default class Snake{
                 await this.update()
             }
         } catch (error) {
+            failSound.play()
             console.log(error)
         }
         
@@ -78,7 +86,7 @@ export default class Snake{
     }
 
     async update(){
-        await wait(400)
+        await wait(500-this.level*10)
         // check 
 
         // move in direction it is
@@ -123,8 +131,8 @@ export default class Snake{
     checkBoundary(){
         
         const front = this.pos[this.pos.length-1]
-        if(front.x >= width || front.x <= 0 || front.y <= 0 || front.y >= height){
-            failSound.play()
+        if(front.x >= Board.width || front.x < 0 || front.y < 0 || front.y >= Board.height){
+            // failSound.play()
             throw Error('collision with wall')
         }
 
@@ -138,7 +146,7 @@ export default class Snake{
         //     throw Error('collistion with snake')    
         // }
         if(this.isSnake(front.x, front.y)){
-            failSound.play()
+            // failSound.play()
             throw Error('collision with snake')
         }
     }
@@ -151,9 +159,12 @@ export default class Snake{
         return false
     }
 
+    /**
+     * generate random position for food and render it on UI
+     */
     getRandomBlock(): coord{
-        const x_offset = Math.floor(Math.random()*15)
-        const y_offset = Math.floor(Math.random()*10)
+        const x_offset = Math.floor(Math.random()*Board.blocksInRow)
+        const y_offset = Math.floor(Math.random()*Board.blocksInCol)
 
         const block:coord = {
             x: this.gap + x_offset*(this.gap+this.size),
@@ -167,7 +178,7 @@ export default class Snake{
         // this.draw(block.x, block.y, 'black')
         // ctx.circle(block.x+this.size/2, block.y+this.size/2, this.size/2, 'black')
         
-        ctx.draw_image(food,block.x, block.y)
+        ctx.draw_image(food,block.x, block.y, this.size)
         this.randomBlock = block
         return block
     }
@@ -222,5 +233,47 @@ export default class Snake{
     clear(x:number, y:number){
         const len = this.size+this.gap
         ctx.clear(x, y, len, len)
+    }
+}
+
+export class Board{
+    public static height:number
+    public static width:number
+    public static blocksInRow:number
+    public static blocksInCol:number
+    constructor(){
+
+    }
+
+    static approximateBlock(length:number):number{
+        return Math.floor((length-gap)/(unit+gap))
+    }
+
+    /**
+     * adjust dimension of board according to device width and height
+     */
+    static adjustDimension():{height:number, width:number} {
+        let screenWidth = document.documentElement.clientWidth;
+        let screenHeight = document.documentElement.clientHeight;
+
+        if(screenWidth > 768){
+            // desktop
+            screenWidth = 0.75*screenWidth
+            screenHeight = 0.7*screenHeight
+        } else {
+            // mobile or tablet
+            let border = 20
+            screenWidth -= 2*border
+            screenHeight = screenHeight*0.7-2*border
+
+        }
+
+        this.blocksInRow = this.approximateBlock(screenWidth)
+        this.blocksInCol = this.approximateBlock(screenHeight)
+
+        this.height = this.blocksInCol*(unit+gap) + gap
+        this.width = this.blocksInRow*(unit+gap) + gap
+
+        return {height: this.height, width: this.width}
     }
 }

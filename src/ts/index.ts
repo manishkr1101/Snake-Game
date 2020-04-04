@@ -1,11 +1,20 @@
-import Snake from "./snake";
+import Snake, { Board } from "./snake";
 import elements from "./elements";
+import * as UICtrl from './UIController'
 
 async function wait(ms){
     return new Promise((res, rej) => setTimeout(res, ms))
 }
 
-const snake = new Snake(30, 'blue')
+function setupBoard(){
+    const {height, width} = Board.adjustDimension()
+    UICtrl.setDimension(height, width)
+}
+
+// window.addEventListener('resize',setupBoard)
+// window.addEventListener('load', setupBoard)
+setupBoard()
+const snake = new Snake();
 
 // console.log(snake)
 
@@ -55,13 +64,13 @@ function pauseGame(){
 elements.playBtn.addEventListener('click', playGame)
 elements.pauseBtn.addEventListener('click', pauseGame)
 
-if('serviceWorker' in navigator){
-    navigator.serviceWorker
-        .register('/sw.js')
-        .then(() => {
-            console.log('service worker is installing')
-        })
-}
+// if('serviceWorker' in navigator){
+//     navigator.serviceWorker
+//         .register('../sw.js')
+//         .then(() => {
+//             console.log('service worker is installing')
+//         })
+// }
 
 // let board:any = document.getElementById('board')
 // let ctx: CanvasRenderingContext2D = board.getContext('2d')

@@ -20,8 +20,8 @@ body{
 }
 #board{
     border: solid 20px rgb(92, 86, 86);
-    /* background-color: #2b580c; */
-    background: url('/assets/images/background.jpg');
+    background-color: #2b580c;
+    background: url('../assets/images/background.jpg');
 }
 
 

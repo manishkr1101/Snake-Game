@@ -1,9 +1,9 @@
 {
     "name": "Snake",
-    "start_url": "/",
+    "start_url": "/Snake-Game/",
     "background_color": "green",
     "theme_color": "cyan",
-    "scope": ".",
+    "scope": "./Snake-Game/",
     "display": "standalone",
     "orientation": "landscape"
 }

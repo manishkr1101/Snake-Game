@@ -1,9 +1,17 @@
 # Classic Snake🐍 Game :)
-## Setup 
-`npm install`
+## Get Started
+### Install all required packages
 
-To start development server, run\
-`npm run start`
+```console
+$ npm install
+```
+
+### To start development server run
+
+```console
+$ npm run start
+```
+
 
 ## A snapshot of Game
 [Play now!](https://manishkr1101.github.io/Snake-Game/)

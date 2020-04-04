@@ -22,8 +22,8 @@ export default class Drawer {
         this.context.closePath()
     }
 
-    draw_image(image:HTMLImageElement, dx:number, dy:number){
-        this.context.drawImage(image, dx, dy)
+    draw_image(image:HTMLImageElement, dx:number, dy:number, size:number){
+        this.context.drawImage(image, dx, dy, size, size)
     }
 
     draw_rect(x: number, y: number, width: number, height: number, color: string, fill: boolean = false) {
