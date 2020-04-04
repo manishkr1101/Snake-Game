@@ -1,4 +1,5 @@
 const STATIC_CACHE_NAME = 'static-v1'
+const DYNAMIC_CACHE_NAME = 'dynamic-v1'
 
 self.addEventListener('install', event => {
     console.log('Installing service worker', event)
@@ -24,7 +25,14 @@ self.addEventListener('fetch', event => {
             if(response){
                 return response
             } else{
-                return fetch(event.request)
+                return fetch(event.request).then(res => {
+                    return caches.open(DYNAMIC_CACHE_NAME)
+                        .then(cache => {
+                            cache.put(event.request, res.clone())
+                            return res;
+                        })
+                })
+
             }
         })
     )

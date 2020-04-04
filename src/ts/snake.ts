@@ -1,13 +1,15 @@
 import Drawer from "./drawer"
 import * as UICtrl from './UIController'
 import { unit, snakeColor, gap } from './config'
+import * as db from './db'
 
 type coord = {
     x:number,
     y:number
 }
-
+const HIGH_SCORE='high-score'
 const ctx = new Drawer('board')
+
 
 // const board = document.getElementById('board')
 // // width of board
@@ -27,14 +29,15 @@ async function wait(ms){
 export default class Snake{
     
     private pos: coord[]
-    size:number
+    private size:number
     private gap: number
-    color: string
-    direction: 'left'|'right'|'up'|'down'
+    private color: string
+    public direction: 'left'|'right'|'up'|'down'
     private randomBlock: coord
     private flag: boolean
-    totalScore: number
-    level: number
+    private totalScore: number
+    private level: number
+    private foodEaten: number // food eaten in current level
     constructor(){
         this.size = unit
         // this.gap = Math.floor(this.size / 10)
@@ -47,6 +50,7 @@ export default class Snake{
         this.flag = false
         this.totalScore = 0
         this.level = 1
+        this.foodEaten = 0
         food.src = 'assets/images/food-30x30.png'
         food.onload = () => ctx.draw_image(food,this.randomBlock.x, this.randomBlock.y, this.size)
     }
@@ -70,6 +74,13 @@ export default class Snake{
             }
         } catch (error) {
             failSound.play()
+            if('vibrate' in navigator){
+                navigator.vibrate(100)
+            }
+            let high_score = db.getHighScore()
+            if(!high_score || (high_score < this.totalScore)){
+                db.setHighScore(this.totalScore)
+            }
             console.log(error)
         }
         
@@ -81,12 +92,12 @@ export default class Snake{
     }
 
     async resume(){
-        
+        if(this.flag===true) return
         this.start()
     }
 
     async update(){
-        await wait(500-this.level*10)
+        await wait(300-this.level*40)
         // check 
 
         // move in direction it is
@@ -101,6 +112,12 @@ export default class Snake{
         //1. remove last block
         if(toRemove){
             this.clear(toRemove.x, toRemove.y)
+        } else {
+            // console.log('got food')
+            eatSound.play()
+            this.updateScore()
+            this.manageLevel()
+            this.getRandomBlock()
         }
         
 
@@ -116,7 +133,7 @@ export default class Snake{
         for(let c of this.pos){
             this.draw(c.x, c.y)
         }
-        
+        this.drawFood()
     }
 
     checkFood(): boolean{
@@ -126,6 +143,19 @@ export default class Snake{
         }
         return false
 
+    }
+
+    /**
+     * increment level after eating required apple/food
+     */
+    manageLevel(){
+        this.foodEaten++
+        if(this.foodEaten >= this.level*5){
+            // increment level
+            this.level++
+            // reset foodEaten
+            this.foodEaten = 0
+        }
     }
 
     checkBoundary(){
@@ -178,9 +208,15 @@ export default class Snake{
         // this.draw(block.x, block.y, 'black')
         // ctx.circle(block.x+this.size/2, block.y+this.size/2, this.size/2, 'black')
         
-        ctx.draw_image(food,block.x, block.y, this.size)
         this.randomBlock = block
+        // ctx.draw_image(food,block.x, block.y, this.size)
+        this.drawFood()
         return block
+    }
+
+    private drawFood(){
+        ctx.draw_image(food,this.randomBlock.x, this.randomBlock.y, this.size)
+        
     }
 
     private updateArray():coord{
@@ -210,10 +246,7 @@ export default class Snake{
         this.pos.push(block)
         // check if food is ahead
         if(this.checkFood()){
-            // console.log('got food')
-            eatSound.play()
-            this.updateScore()
-            this.getRandomBlock()
+            
             return
         }
 
